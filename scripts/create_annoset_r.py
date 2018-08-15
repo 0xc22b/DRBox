@@ -96,17 +96,17 @@ if __name__ == "__main__":
           sys.exit()
       break
   # check if label map file exist
-  if anno_type == "detection":
-    if not os.path.exists(label_map_file):
-      print "label map file: {} does not exist".format(label_map_file)
-      sys.exit()
-    label_map = caffe_pb2.LabelMap()
-    lmf = open(label_map_file, "r")
-    try:
-      text_format.Merge(str(lmf.read()), label_map)
-    except:
-      print "Cannot parse label map file: {}".format(label_map_file)
-      sys.exit()
+#  if anno_type == "detection":
+#    if not os.path.exists(label_map_file):
+#      print "label map file: {} does not exist".format(label_map_file)
+#      sys.exit()
+#    label_map = caffe_pb2.LabelMap()
+#    lmf = open(label_map_file, "r")
+#    try:
+#      text_format.Merge(str(lmf.read()), label_map)
+#    except:
+#      print "Cannot parse label map file: {}".format(label_map_file)
+#      sys.exit()
   out_parent_dir = os.path.dirname(out_dir)
   if not os.path.exists(out_parent_dir):
     os.makedirs(out_parent_dir)
@@ -119,7 +119,7 @@ if __name__ == "__main__":
   # get caffe root directory
   caffe_root = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
   if anno_type == "detection":
-    cmd = "{}/build/tools/convert_annoset" \
+    cmd = "{}/build/tools/convert_annoset_r" \
         " --anno_type={}" \
         " --label_type={}" \
         " --label_map_file={}" \

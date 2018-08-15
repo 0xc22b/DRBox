@@ -232,6 +232,52 @@ bool ReadRichImageToAnnotatedDatum(const string& filename,
   }
 }
 
+bool ReadRichImageToAnnotatedDatumR(const string& filename,
+    const string& labelfile, const int height, const int width,
+    const int min_dim, const int max_dim, const bool is_color,
+    const string& encoding, const AnnotatedDatumR_AnnotationType type,
+    const string& labeltype, const std::map<string, int>& name_to_label,
+    AnnotatedDatumR* anno_datum) {
+  // Read image to datum.
+  bool status = ReadImageToDatum(filename, -1, height, width,
+                                 min_dim, max_dim, is_color, encoding,
+                                 anno_datum->mutable_datum());
+  if (status == false) {
+    return status;
+  }
+  anno_datum->clear_annotation_group();
+  if (!boost::filesystem::exists(labelfile)) {
+    return true;
+  }
+  switch (type) {
+    case AnnotatedDatumR_AnnotationType_RBOX:
+      int ori_height, ori_width;
+      GetImageSize(filename, &ori_height, &ori_width);
+      if (ori_height != ori_width){
+      	LOG(FATAL) << "input figure must have same width and height.";
+      	return false;
+      }
+//      if (labeltype == "xml") {
+//        return ReadXMLToAnnotatedDatum(labelfile, ori_height, ori_width,
+//                                       name_to_label, anno_datum);
+//      } else if (labeltype == "json") {
+//        return ReadJSONToAnnotatedDatum(labelfile, ori_height, ori_width,
+//                                        name_to_label, anno_datum);
+//      }
+      if (labeltype == "txt") {
+        return ReadTxtToAnnotatedDatumR(labelfile, ori_height, ori_width,
+                                       anno_datum);
+      } else {
+        LOG(FATAL) << "Unknown label file type.";
+        return false;
+      }
+      break;
+    default:
+      LOG(FATAL) << "Unknown annotation type.";
+      return false;
+  }
+}
+
 #endif  // USE_OPENCV
 
 bool ReadFileToDatum(const string& filename, const int label,
@@ -524,6 +570,56 @@ bool ReadTxtToAnnotatedDatum(const string& labelfile, const int height,
     bbox->set_xmax(xmax / width);
     bbox->set_ymax(ymax / height);
     bbox->set_difficult(false);
+  }
+  return true;
+}
+
+// Parse plain txt rdetection annotation: x_center, ycenter, width, height, label, angle .
+bool ReadTxtToAnnotatedDatumR(const string& labelfile, const int height,
+    const int width, AnnotatedDatumR* anno_datum) {
+  LOG(INFO) << labelfile;
+  std::ifstream infile(labelfile.c_str());
+  if (!infile.good()) {
+    LOG(INFO) << "Cannot open " << labelfile;
+    return false;
+  }
+  int label;
+  float xcenter, ycenter, anno_width, anno_height, angle;
+  while (infile >> xcenter >> ycenter >> anno_width >> anno_height >> label >> angle) {
+  	LOG(INFO) << xcenter <<","<< ycenter <<","<< anno_width <<","<< anno_height<<"," << label<<"," << angle;
+    AnnotationR* anno = NULL;
+    int instance_id = 0;
+    bool found_group = false;
+    for (int g = 0; g < anno_datum->annotation_group_size(); ++g) {
+      AnnotationGroupR* anno_group = anno_datum->mutable_annotation_group(g);
+      if (label == anno_group->group_label()) {
+        if (anno_group->annotation_size() == 0) {
+          instance_id = 0;
+        } else {
+          instance_id = anno_group->annotation(
+              anno_group->annotation_size() - 1).instance_id() + 1;
+        }
+        anno = anno_group->add_annotation();
+        found_group = true;
+      }
+    }
+    if (!found_group) {
+      // If there is no such annotation_group, create a new one.
+      AnnotationGroupR* anno_group = anno_datum->add_annotation_group();
+      anno_group->set_group_label(label);
+      anno = anno_group->add_annotation();
+      instance_id = 0;
+    }
+    anno->set_instance_id(instance_id++);
+    
+    // Store the normalized bounding box.
+    NormalizedRBox* rbox = anno->mutable_rbox();
+    rbox->set_xcenter(xcenter / width);
+    rbox->set_ycenter(ycenter / height);
+    rbox->set_width(anno_width / width);
+    rbox->set_height(anno_height / height);
+    rbox->set_angle(angle);
+    rbox->set_label(label);
   }
   return true;
 }

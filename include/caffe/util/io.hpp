@@ -250,6 +250,26 @@ inline bool MapLabelToDisplayName(const LabelMap& map,
   return MapLabelToDisplayName(map, true, label_to_display_name);
 }
 
+bool ReadTxtToAnnotatedDatumR(const string& labelfile, const int height,
+    const int width, AnnotatedDatumR* anno_datum);
+    
+bool ReadRichImageToAnnotatedDatumR(const string& filename,
+    const string& labelfile, const int height, const int width,
+    const int min_dim, const int max_dim, const bool is_color,
+    const string& encoding, const AnnotatedDatumR_AnnotationType type,
+    const string& labeltype, const std::map<string, int>& name_to_label,
+    AnnotatedDatumR* anno_datum);
+    
+inline bool ReadRichImageToAnnotatedDatumR(const string& filename,
+    const string& labelname, const int height, const int width,
+    const bool is_color, const std::string & encoding,
+    const AnnotatedDatumR_AnnotationType type, const string& labeltype,
+    const std::map<string, int>& name_to_label, AnnotatedDatumR* anno_datum) {
+  return ReadRichImageToAnnotatedDatumR(filename, labelname, height, width, 0, 0,
+                      is_color, encoding, type, labeltype, name_to_label,
+                      anno_datum);
+}
+
 #ifdef USE_OPENCV
 cv::Mat ReadImageToCVMat(const string& filename, const int height,
     const int width, const int min_dim, const int max_dim, const bool is_color);

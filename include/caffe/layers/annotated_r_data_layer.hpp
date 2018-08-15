@@ -1,5 +1,5 @@
-#ifndef CAFFE_ANNOTATED_DATA_LAYER_HPP_
-#define CAFFE_ANNOTATED_DATA_LAYER_HPP_
+#ifndef CAFFE_ANNOTATED_R_DATA_LAYER_HPP_
+#define CAFFE_ANNOTATED_R_DATA_LAYER_HPP_
 
 #include <string>
 #include <vector>
@@ -16,10 +16,10 @@
 namespace caffe {
 
 template <typename Dtype>
-class AnnotatedDataLayer : public BasePrefetchingDataLayer<Dtype> {
+class AnnotatedRDataLayer : public BasePrefetchingDataLayer<Dtype> {
  public:
-  explicit AnnotatedDataLayer(const LayerParameter& param);
-  virtual ~AnnotatedDataLayer();
+  explicit AnnotatedRDataLayer(const LayerParameter& param);
+  virtual ~AnnotatedRDataLayer();
   virtual void DataLayerSetUp(const vector<Blob<Dtype>*>& bottom,
       const vector<Blob<Dtype>*>& top);
   // AnnotatedDataLayer uses DataReader instead for sharing for parallelism
@@ -31,13 +31,13 @@ class AnnotatedDataLayer : public BasePrefetchingDataLayer<Dtype> {
  protected:
   virtual void load_batch(Batch<Dtype>* batch);
 
-  DataReader<AnnotatedDatum> reader_;
+  DataReader<AnnotatedDatumR> reader_;
   bool has_anno_type_;
-  AnnotatedDatum_AnnotationType anno_type_;
+  AnnotatedDatumR_AnnotationType anno_type_;
   vector<BatchSampler> batch_samplers_;
   string label_map_file_;
 };
 
 }  // namespace caffe
 
-#endif  // CAFFE_DATA_LAYER_HPP_
+#endif  // CAFFE_ANNOTATED_r_DATA_LAYER_HPP_
