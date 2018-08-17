@@ -28,6 +28,7 @@ TYPED_TEST(LayerFactoryTest, TestCreateLayer) {
        registry.begin(); iter != registry.end(); ++iter) {
     // Special case: PythonLayer is checked by pytest
     if (iter->first == "Python") { continue; }
+    if (iter->first == "AnnotatedRData" || iter->first == "RDetectionOutput") { continue; }
     LayerParameter layer_param;
     // Data layers expect a DB
     if (iter->first == "Data" || iter->first == "AnnotatedData") {

@@ -619,3 +619,7 @@ extern "C"
 	//double DecodeAndNMS
 	
 }
+
+int main(int argc, char** argv) {
+  return 0;
+}
